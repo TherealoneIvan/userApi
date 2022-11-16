@@ -19,29 +19,32 @@ func NewHandler(userApi *api.UserApi) *Handler {
 const minute = 60
 
 func (h *Handler) InitRoutes() *chi.Mux {
-	r := chi.NewRouter()
+	router := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Timeout(minute * time.Second))
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Logger)
+	router.Use(middleware.Timeout(minute * time.Second))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(time.Now().String()))
 	})
-	r.Route("/api", func(r chi.Router) {
-		r.Route("/v1", func(r chi.Router) {
-			r.Route("/users", func(r chi.Router) {
-				r.Get("/", h.SearchUsers)
-				r.Post("/", h.CreateUser)
-
-				r.Route("/{id}", func(r chi.Router) {
-					r.Get("/", h.GetUser)
-					r.Patch("/", h.UpdateUser)
-					r.Delete("/", h.DeleteUser)
+	router.Route("/api",
+		func(router chi.Router) {
+			router.Route("/v1",
+				func(router chi.Router) {
+					router.Route("/users",
+						func(router chi.Router) {
+							router.Get("/", h.SearchUsers)
+							router.Post("/", h.CreateUser)
+							router.Route("/{id}",
+								func(router chi.Router) {
+									router.Get("/", h.GetUser)
+									router.Patch("/", h.UpdateUser)
+									router.Delete("/", h.DeleteUser)
+								})
+						})
 				})
-			})
 		})
-	})
-	return r
+	return router
 }

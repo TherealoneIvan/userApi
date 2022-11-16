@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	userapi "refactoring"
+	userAPI "refactoring"
 	"refactoring/api"
 	"refactoring/pkg/handler"
 	"refactoring/pkg/repository"
@@ -19,7 +19,7 @@ func main() {
 	repos := repository.NewRepository(store)
 	userApi := api.NewUserApiService(repos)
 	handlers := handler.NewHandler(userApi)
-	server := new(userapi.Server)
+	server := new(userAPI.Server)
 
 	if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured running the server %s", err.Error())

@@ -2,11 +2,16 @@ package api
 
 import (
 	"fmt"
-	userStore "refactoring"
+	userApi "refactoring"
 	"refactoring/pkg/handler/requests"
 	"refactoring/pkg/repository"
 	"strconv"
 	"time"
+)
+
+const (
+	userNotFoundErr  = "user not found"
+	undefinedUserErr = "undefined user"
 )
 
 type UserApi struct {
@@ -16,10 +21,10 @@ type UserApi struct {
 func NewUserApiService(repository repository.UserApi) *UserApi {
 	return &UserApi{repository: repository}
 }
-func (u *UserApi) SearchUsers() (userStore.UserStore, error) {
+func (u *UserApi) SearchUsers() (userApi.UserStore, error) {
 	UserStore, err := u.repository.SearchUsers()
 	if err != nil {
-		return userStore.UserStore{}, err
+		return userApi.UserStore{}, err
 	}
 	return UserStore, nil
 }
@@ -29,7 +34,7 @@ func (u *UserApi) CreateUser(DisplayName, Email string) (string, error) {
 		return "", err
 	}
 	UserStore.Increment++
-	user := userStore.User{
+	user := userApi.User{
 		CreatedAt:   time.Now(),
 		DisplayName: DisplayName,
 		Email:       Email,
@@ -40,40 +45,40 @@ func (u *UserApi) CreateUser(DisplayName, Email string) (string, error) {
 	return id, nil
 }
 func (u *UserApi) UpdateUser(id string, updateUserRequest requests.UpdateUserRequest) error {
-	UserStore, err := u.repository.SearchUsers()
+	userStore, err := u.repository.SearchUsers()
 	if err != nil {
 		return err
 	}
 
-	if _, ok := UserStore.List[id]; !ok {
-		err := fmt.Errorf("%s", "undefined user")
+	if _, ok := userStore.List[id]; !ok {
+		err := fmt.Errorf("%s", undefinedUserErr)
 		return err
 	}
-
-	user := UserStore.List[id]
+	user := userStore.List[id]
 	user.DisplayName = updateUserRequest.DisplayName
-	UserStore.List[id] = user
-	u.repository.WriteChanges(UserStore)
+	userStore.List[id] = user
+	u.repository.WriteChanges(userStore)
 	return nil
 }
 
 func (u *UserApi) DeleteUser(id string) error {
-	UserStore, err := u.repository.DeleteUser()
+	userStore, err := u.repository.DeleteUser()
 	if err != nil {
 		return err
 	}
-	if _, ok := UserStore.List[id]; !ok {
-		err := fmt.Errorf("%s", "user not found")
+	if _, ok := userStore.List[id]; !ok {
+
+		err := fmt.Errorf("%s", userNotFoundErr)
 		return err
 	}
-	delete(UserStore.List, id)
-	u.repository.WriteChanges(UserStore)
+	delete(userStore.List, id)
+	u.repository.WriteChanges(userStore)
 	return nil
 }
-func (u *UserApi) GetUser(id string) (userStore.User, error) {
-	UserStore, err := u.repository.SearchUsers()
+func (u *UserApi) GetUser(id string) (userApi.User, error) {
+	userStore, err := u.repository.SearchUsers()
 	if err != nil {
-		return userStore.User{}, err
+		return userApi.User{}, err
 	}
-	return UserStore.List[id], nil
+	return userStore.List[id], nil
 }

@@ -20,10 +20,11 @@ func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 }
 
 func ErrInvalidRequest(err error) render.Renderer {
+	const invalidRequest = "Invalid request."
 	return &ErrResponse{
 		Err:            err,
-		HTTPStatusCode: 400,
-		StatusText:     "Invalid request.",
+		HTTPStatusCode: http.StatusBadRequest,
+		StatusText:     invalidRequest,
 		ErrorText:      err.Error(),
 	}
 }

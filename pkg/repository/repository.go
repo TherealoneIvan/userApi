@@ -7,8 +7,6 @@ import (
 	userapi "refactoring"
 )
 
-//const store = `users.json`
-
 type RepositoryJSON struct {
 	store string
 }
@@ -21,12 +19,12 @@ func (r *RepositoryJSON) userStore() (userapi.UserStore, error) {
 	if err != nil {
 		return userapi.UserStore{}, err
 	}
-	s := userapi.UserStore{}
-	err = json.Unmarshal(f, &s)
+	userStore := userapi.UserStore{}
+	err = json.Unmarshal(f, &userStore)
 	if err != nil {
 		return userapi.UserStore{}, err
 	}
-	return s, nil
+	return userStore, nil
 }
 
 func (r *RepositoryJSON) CreateUser() (userapi.UserStore, error) {
